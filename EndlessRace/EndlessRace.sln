@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EndlessRace", "EndlessRace\EndlessRace\EndlessRace.csproj", "{99F348C7-6D8F-4A30-82ED-5C4F05AB9C72}"
+EndProject
+Project("{96E2B04D-8817-42C6-938A-82C39BA4D311}") = "EndlessRaceContent", "EndlessRace\EndlessRaceContent\EndlessRaceContent.contentproj", "{47412A0C-89FC-4F91-AB92-1D9DBBD12D97}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{99F348C7-6D8F-4A30-82ED-5C4F05AB9C72}.Debug|x86.ActiveCfg = Debug|x86
+		{99F348C7-6D8F-4A30-82ED-5C4F05AB9C72}.Debug|x86.Build.0 = Debug|x86
+		{99F348C7-6D8F-4A30-82ED-5C4F05AB9C72}.Release|x86.ActiveCfg = Release|x86
+		{99F348C7-6D8F-4A30-82ED-5C4F05AB9C72}.Release|x86.Build.0 = Release|x86
+		{47412A0C-89FC-4F91-AB92-1D9DBBD12D97}.Debug|x86.ActiveCfg = Debug|x86
+		{47412A0C-89FC-4F91-AB92-1D9DBBD12D97}.Release|x86.ActiveCfg = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

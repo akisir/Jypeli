@@ -1,47 +1,61 @@
 ﻿//EndlessRace.cs for hobby projects
 //7.4.2018 by Aki Sirviö
+using System.Collections.Generic;
 using Jypeli;
 using Jypeli.Assets;
 using Jypeli.Controls;
 using Jypeli.Widgets;
+using System.Linq;
 
 //drive by car and compete against time in endless race
 public class EndlessRace : PhysicsGame
 {
     Vector[] reitti;
+    List<PhysicsObject> esineet;
     Automobile auto;
     RoadMap tie;
+    RoadMap kaide1;
+    RoadMap kaide2;
+    Label liekki;
     IntMeter kakkuLaskuri;
     Timer aikaLaskuri;
-    int leveys = 250;
     int nopeus = 700;
+    bool tormatty = false;
 
     SoundEffect jarrutus = LoadSoundEffect("car-breaking");
     SoundEffect kaynnistys = LoadSoundEffect("StartCar");
     SoundEffect torvi = LoadSoundEffect("OOGAhorn");
     SoundEffect kaynti = LoadSoundEffect("car+start3");
-    SoundEffect kaide = LoadSoundEffect("kaide3");
+    SoundEffect kaideAani = LoadSoundEffect("kaide3");
     SoundEffect kakku = LoadSoundEffect("kakku");
     SoundEffect turboAani = LoadSoundEffect("car+running3");
     SoundEffect turboHit = LoadSoundEffect("turbo");
     SoundEffect pommi = LoadSoundEffect("pommi2");
+    Image[] liekkiAnim = LoadImages("flame3", "flame", "flame2", "flame4","flame");
 
     //program starts here
     public override void Begin()
     {
         Vector b = new Vector(0, 0);
         reitti = new Vector[] { b, b, b, b, b };
-        LuoRata();
+        esineet = new List<PhysicsObject>();
         LisaaPelaaja();
+        LuoRata(0);
         TeeLaskuri();
         TeeAikalaskuri();
         AlkuAnimaatio();
+        Liekki();
 
         Camera.Follow(auto);
         Camera.FollowOffset = new Vector(0,Screen.Height*0.3);
-        Window.Title = "Car race 1";
+        Window.Title = "Endless Race";
         Mouse.IsCursorVisible = true;
         Level.Background.CreateStars();
+
+        Timer poisto = new Timer();
+        poisto.Interval = 0.5;
+        poisto.Timeout += Poista;
+        poisto.Start();
     }
 
     //controls
@@ -53,6 +67,7 @@ public class EndlessRace : PhysicsGame
         Keyboard.Listen(Key.Up, ButtonState.Released, Jarruta, "Jarruta", auto);
         Keyboard.Listen(Key.Left, ButtonState.Down, Kaanny, "Vasemmalle", auto, 1);
         Keyboard.Listen(Key.Right, ButtonState.Down, Kaanny, "Oikealle", auto, -1);
+        Keyboard.Listen(Key.Space, ButtonState.Pressed, delegate { MessageDisplay.Add("" + auto.Y); }, "");
 
         ShowControlHelp();
     }
@@ -63,7 +78,6 @@ public class EndlessRace : PhysicsGame
         auto = new Automobile(50, 35);
         auto.Mass = 20;
         auto.Tag = "auto";
-        auto.X = 0;
         auto.Maneuverability = Angle.FromDegrees(200);
         auto.Acceleration = 450;
         auto.BrakeDeceleration = 2000;
@@ -71,26 +85,28 @@ public class EndlessRace : PhysicsGame
         auto.Image = LoadImage("car");
         auto.AngularDamping = 0.2;
         auto.LinearDamping = 0.97;
+        auto.CollisionIgnoreGroup = 1;
         auto.Angle = Angle.FromDegrees(90);
         auto.Restitution = 1.0;
         Add(auto);
     }
 
     //make endless track one piece at time
-    void LuoRata()
+    void LuoRata(double y)
     {
         Vector a;
         double pituus = 0;
         double koordX = 0;
         double koordY = 0;
         double X = 0;
-        for (int i = 0; i < 5; i++)
+
+        for (int i = 0; i < reitti.Count(); i++)
         {
             if (i == 0)
             {
                 koordX = reitti[4].X;
-                koordY = reitti[4].Y;
-                a = new Vector(koordX, (koordY - 30));
+                koordY = reitti[4].Y-y;
+                a = new Vector(koordX, (koordY-30));
             }
             else
             {
@@ -102,17 +118,16 @@ public class EndlessRace : PhysicsGame
             }
             if (i == 2)
             {
-                TeeApuviiva(0, koordY / 2);
+                TeeApuviiva(0, koordY);
             }
             reitti[i] = a;
         }
 
-        leveys = RandomGen.NextInt(150, 350);
+        double leveys = RandomGen.NextInt(150, 350);
         tie = new RoadMap(reitti);
         tie.DefaultWidth = leveys;
         tie.Insert();
-
-        TeeKaiteet();
+        TeeKaiteet(leveys);
         TeeEsineet(reitti[0].Y, reitti[4].Y);
     }
 
@@ -123,6 +138,7 @@ public class EndlessRace : PhysicsGame
         Image kakku2 = LoadImage("cake2");
         Image kakku3 = LoadImage("cake3");
         Image kakku4 = LoadImage("cake4");
+        //cakes
         for (int i=0; i<10; i++)
         {
             double x = RandomGen.NextDouble(-100, 100);
@@ -138,10 +154,11 @@ public class EndlessRace : PhysicsGame
                     kakku.Image = RandomGen.SelectOne(kakku1, kakku2, kakku3, kakku4);
                     AddCollisionHandler<PhysicsObject, Automobile>(kakku, OsuKakkuun);
                     Add(kakku);
+                    esineet.Add(kakku);
                 }
             }
         }
-
+        //flames
         for (int i = 0; i < 5; i++)
         {
             double x = RandomGen.NextDouble(-100, 100);
@@ -157,10 +174,11 @@ public class EndlessRace : PhysicsGame
                     turbo.Image = LoadImage("flame");
                     AddCollisionHandler<PhysicsObject, Automobile>(turbo, OsuTurboon);
                     Add(turbo);
+                    esineet.Add(turbo);
                 }
             }
         }
-
+        //bombs
         for (int i = 0; i < 3; i++)
         {
             double x = RandomGen.NextDouble(-100, 100);
@@ -176,13 +194,14 @@ public class EndlessRace : PhysicsGame
                     pommi.Image = LoadImage("bom6");
                     AddCollisionHandler<PhysicsObject, Automobile>(pommi, OsuPommiin);
                     Add(pommi);
+                    esineet.Add(pommi);
                 }
             }
         }
     }
 
     //make handrails
-    void TeeKaiteet()
+    void TeeKaiteet(double leveys)
     {
         Vector[] sKaide = new Vector[reitti.Length];
         Vector[] uKaide = new Vector[reitti.Length];
@@ -198,11 +217,11 @@ public class EndlessRace : PhysicsGame
             uKaide[i] = new Vector(X, Y);
         }
 
-        RoadMap kaide1 = new RoadMap(sKaide);
+        kaide1 = new RoadMap(sKaide);
         kaide1.DefaultWidth = 50;
         kaide1.CreateSegmentFunction = KaiteenOsa;
         kaide1.Insert();
-        RoadMap kaide2 = new RoadMap(uKaide);
+        kaide2 = new RoadMap(uKaide);
         kaide2.DefaultWidth = 70;
         kaide2.CreateSegmentFunction = KaiteenOsa;
         kaide2.Insert();
@@ -222,15 +241,15 @@ public class EndlessRace : PhysicsGame
     //make help line
     void TeeApuviiva(double x, double y)
     {
-        PhysicsObject apuviiva = PhysicsObject.CreateStaticObject(leveys+350, 10);
+        PhysicsObject apuviiva = PhysicsObject.CreateStaticObject(700, 10);
         apuviiva.X = x;
         apuviiva.Y = y;
         apuviiva.Color = Color.DarkGray;
         apuviiva.IgnoresCollisionResponse = true;
         apuviiva.IsVisible = false;
-        apuviiva.Tag = "apuviiva";
         AddCollisionHandler<PhysicsObject, Automobile>(apuviiva, ApuviivaOsui);
         Add(apuviiva);
+        esineet.Add(apuviiva);
     }
 
     //make cake counter
@@ -244,12 +263,14 @@ public class EndlessRace : PhysicsGame
         kakkuMittari.TextColor = Color.Yellow;
         kakkuMittari.Color = Color.Transparent;
         kakkuMittari.Title = "Cakes";
+        kakkuMittari.Tag = "pida";
         kakkuMittari.BindTo(kakkuLaskuri);
         Add(kakkuMittari);
 
         GameObject kakkuKuva = new GameObject(50, 50);
         kakkuKuva.X -= 150;
         kakkuKuva.Y += 10;
+        kakkuKuva.Tag = "pida";
         kakkuKuva.Image = LoadImage("cake2");
         kakkuMittari.Add(kakkuKuva);
     }
@@ -263,6 +284,7 @@ public class EndlessRace : PhysicsGame
         aikaNaytto.Color = Color.Transparent;
         aikaNaytto.Title = "Time";
         aikaNaytto.DecimalPlaces = 1;
+        aikaNaytto.Tag = "pida";
         aikaNaytto.BindTo(aikaLaskuri.SecondCounter);
         aikaNaytto.X = Screen.Right - Screen.Width/4;
         aikaNaytto.Y = Screen.Top - 100;
@@ -272,8 +294,22 @@ public class EndlessRace : PhysicsGame
         GameObject kelloKuva = new GameObject(50, 50);
         kelloKuva.X -= 150;
         kelloKuva.Y += 10;
+        kelloKuva.Tag = "pida";
         kelloKuva.Image = LoadImage("clock3");
         aikaNaytto.Add(kelloKuva);
+    }
+
+    //flame animation
+    void Liekki()
+    {
+        liekki = new Label(50, 50);
+        liekki.X -= 0;
+        liekki.Y = Screen.Top - 50;
+        liekki.Tag = "pida";
+        liekki.Image = LoadImage("clock3");
+        Add(liekki);
+        liekki.Animation = new Animation(liekkiAnim);
+        liekki.Animation.FPS = 7;
     }
 
     //accelerate
@@ -303,19 +339,64 @@ public class EndlessRace : PhysicsGame
     {
         nopeus = 700;
         turboAani.Stop();
+        liekki.Animation.Stop();
+        liekki.Size /= 2;
+    }
+
+    //remove junk objects
+    void Poista()
+    {
+        List<GameObject> poistaLista = GetObjects(a => a.Y < auto.Y - 2500 && a.Tag.ToString() != "pida");
+        foreach(GameObject objekti in poistaLista)
+        {
+            objekti.Destroy();
+        }
     }
 
     //hit guide line
     void ApuviivaOsui(PhysicsObject tormaaja, Automobile kohde)
     {
-        LuoRata();
+        if(!tormatty)
+        {
+            tormatty = true;
+            Timer.SingleShot(2, delegate { tormatty = false; });
+            if (kohde.Tag.ToString() == "auto")
+            {
+                double y = tormaaja.Y;
+                tormaaja.Destroy();
+                SiirraObjektit(y);
+                LuoRata(y);
+            }
+        }
+    }
+
+    //move roud and other objects
+    void SiirraObjektit(double y)
+    {
+        foreach (PhysicsObject objekti in esineet.ToArray())
+        {
+            objekti.Y -= y;
+        }
+        foreach (GameObject osa in tie.Segments)
+        {
+            osa.Y -= y;
+        }
+        foreach (GameObject osa in kaide1.Segments)
+        {
+            osa.Y -= y;
+        }
+        foreach (GameObject osa in kaide2.Segments)
+        {
+            osa.Y -= y;
+        }
+        auto.Y -= y;
     }
 
     //hit handrail
     void TormaysKaiteeseen(PhysicsObject tormaaja, Automobile kohde)
     {
         kaynti.Stop();
-        kaide.Play();
+        kaideAani.Play();
     }
 
     //hit cake
@@ -336,6 +417,8 @@ public class EndlessRace : PhysicsGame
         turboHit.Play();
         nopeus = 1700;
         Timer.SingleShot(2, NormaaliNopeus);
+        liekki.Animation.Start();
+        liekki.Size *= 2;
     }
 
     //hit bomb

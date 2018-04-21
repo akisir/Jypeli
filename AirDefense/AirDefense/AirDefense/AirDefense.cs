@@ -25,6 +25,13 @@ public class AirDefense : PhysicsGame
     int nopeus = 0;
     double skaalaus = 0;
     bool turbo = false;
+    SoundEffect ammuAaniB;
+    SoundEffect rajahdysAani;
+    SoundEffect liikutaAani;
+    SoundEffect liikutaAani2;
+    SoundEffect kaannaAaniB;
+    Sound kaannaAani;
+    Sound ammuAani;
 
     //program starts here
     public override void Begin()
@@ -33,6 +40,9 @@ public class AirDefense : PhysicsGame
         koneet = new List<PhysicsObject>();
         osumat = new DoubleMeter(0.0);
         Window.Title = "Air Defense ©";
+        MediaPlayer.Play("AirDefense");
+        MediaPlayer.IsRepeating = true;
+        MediaPlayer.Volume = 0.05;
         SeuraavaKentta();
     }
 
@@ -40,10 +50,17 @@ public class AirDefense : PhysicsGame
     void SeuraavaKentta()
     {
         ClearAll();
-        if(IsPaused)
+        ammuAaniB = LoadSoundEffect("Shoot");
+        rajahdysAani = LoadSoundEffect("Explosion");
+        liikutaAani = LoadSoundEffect("Turn1");
+        liikutaAani2 = LoadSoundEffect("Turn");
+        kaannaAaniB = LoadSoundEffect("Angle");
+        kaannaAani = kaannaAaniB.CreateSound();
+        ammuAani = ammuAaniB.CreateSound();
+        ammuAani.Volume = 1.0;
+        kaannaAani.Volume = 0.5;
+        if (IsPaused)
         {
-            taustat.Clear();
-            osumat.Value = 0;
             Pause();
         }
         if(kenttaNro == 1)
@@ -104,16 +121,23 @@ public class AirDefense : PhysicsGame
             LataaTaustakuvat("AirPanorama2", 3);
         }
 
-        Otsikko("Level " + kenttaNro, 0.2, 10);
-        TeeTahtain();
-        TeeTykki();
-        Ohjaimet();
-        TeeLaskuri();
-        Ajastimet(1);
+        if (kenttaNro > 9)
+        {
+            Voitto();
+        }
+        else
+        {
+            Otsikko("Level " + kenttaNro, 0.2, 10);
+            TeeTahtain();
+            TeeTykki(true);
+            Ohjaimet();
+            TeeLaskuri();
+            Ajastimet(1);
+        }
     }
 
     //make timers for planes
-    void Ajastimet(int aika)
+    void Ajastimet(double aika)
     {
         Timer lisaaKone = new Timer();
         lisaaKone.Interval = aika;
@@ -185,13 +209,22 @@ public class AirDefense : PhysicsGame
     }
 
     //add cannon
-    void TeeTykki()
+    void TeeTykki(bool ampuu)
     {
         tykki = new PhysicsObject(100, 1400);
         tykki.Image = LoadImage("tykki");
         tykki.Y = Screen.Bottom-400;
-        AddCollisionHandler(tykki, "kone", OsuiTykkiin);
+        tykki.IgnoresGravity = true;
+        
         Add(tykki,2);
+        if(ampuu)
+        {
+            AddCollisionHandler(tykki, "kone", OsuiTykkiin);
+        }
+        else
+        {
+            tykki.IgnoresCollisionResponse = true;
+        }
     }
 
     //add plane
@@ -236,6 +269,10 @@ public class AirDefense : PhysicsGame
     //move sight
     void LiikutaTahtainta(AnalogState liike)
     {
+        if(!kaannaAaniB.IsPlaying)
+        {
+            kaannaAani.Play();
+        }
         tahtain.Position = Mouse.PositionOnScreen;
         Vector suunta = (Mouse.PositionOnWorld - tykki.AbsolutePosition).Normalize();
         double tykkiY = Mouse.PositionOnScreen.Y - Screen.Height/1.2;
@@ -282,6 +319,22 @@ public class AirDefense : PhysicsGame
     {
         if (taustat[0].Left+30 < Screen.Left && suunta==1 || taustat[taustat.Count-1].Right-30>Screen.Right && suunta==-1)
         {
+            if(turbo)
+            {
+                if (!liikutaAani2.IsPlaying)
+                {
+                    liikutaAani2.Play();
+                }
+            }
+            else
+            {
+                if (!liikutaAani.IsPlaying)
+                {
+                    liikutaAani.Play();
+                }
+            }
+            
+
             foreach (GameObject tausta in taustat)
             {
                 if (turbo)
@@ -333,7 +386,7 @@ public class AirDefense : PhysicsGame
             ammus.Position = paikka;
             ammus.Angle = tykki.Angle;
             Add(ammus, 1);
-            ammus.MoveTo(tahtain.Position, 15000, delegate { rajahdys(ammus); });
+            ammus.MoveTo(tahtain.Position, 15000, delegate { Rajahdys(ammus,true); });
 
             Image liekkiKuva = RandomGen.SelectOne(liekkiKuvat[0],liekkiKuvat[1], liekkiKuvat[2], liekkiKuvat[3]);
             liekki = new Flame(liekkiKuva);
@@ -352,19 +405,25 @@ public class AirDefense : PhysicsGame
             savu.MaxVelocity = 1000;
             savu.MinVelocity = 50;
             Add(savu);
+            ammuAani.Play();
+            ammuAaniB.Play();
         }
     }
 
-    //explosion destroys cannon
-    void rajahdys(GameObject ammus)
+    //ammo explodes
+    void Rajahdys(GameObject ammus, bool peli)
     {
         Vector paikka = ammus.Position;
         ammus.Destroy();
         Explosion rajahdys = new Explosion(10.0);
         rajahdys.Position = paikka;
         rajahdys.Image = LoadImage("explosion2");
-        rajahdys.AddShockwaveHandler("kone", Osu);
+        rajahdys.Sound = rajahdysAani;
         Add(rajahdys);
+        if(peli)
+        {
+            rajahdys.AddShockwaveHandler("kone", Osu);
+        }
     }
 
     //ammo hit the plane
@@ -430,13 +489,58 @@ public class AirDefense : PhysicsGame
         startPainike.Y = Screen.Top / 7;
         startPainike.Image = LoadImage("start");
         Add(startPainike,2);
-        kenttaNro = 1;
-        Mouse.ListenOn(startPainike, MouseButton.Left, ButtonState.Pressed, SeuraavaKentta, "");
+        Mouse.ListenOn(startPainike, MouseButton.Left, ButtonState.Pressed, AlotaAlusta, "");
 
         GameObject endPainike = new GameObject(300,100);
         endPainike.Y = Screen.Bottom / 7;
         endPainike.Image = LoadImage("end");
         Add(endPainike,2);
         Mouse.ListenOn(endPainike, MouseButton.Left, ButtonState.Pressed, Exit, "");
+    }
+
+    //start game again
+    void AlotaAlusta()
+    {
+        taustat.Clear();
+        koneet.Clear();
+        osumat.Value = 0;
+        kenttaNro = 1;
+        SeuraavaKentta();
+    }
+
+    //show victory level
+    void Voitto()
+    {
+        GameObject tausta = new GameObject(Screen.Width, Screen.Height);
+        tausta.Image = LoadImage("plane1");
+        Add(tausta);
+        taustat.Add(tausta);
+        TeeTahtain();
+        TeeTykki(false);
+        Painikkeet();
+        TeePohja();
+        Timer lisaaKone = new Timer();
+        lisaaKone.Interval = 0.005;
+        lisaaKone.Timeout += TeeLentokone;
+        lisaaKone.Start();
+        Gravity = new Vector(0, -5000);
+        Mouse.ListenMovement(0.1, LiikutaTahtainta, "Aim");
+        kaannaAani.Volume = 0.05;
+    }
+
+    //bottom that explode planes at victory level
+    void TeePohja()
+    {
+        PhysicsObject pohja = PhysicsObject.CreateStaticObject(Screen.Width, 10);
+        pohja.IsVisible = false;
+        AddCollisionHandler(pohja, "kone", OsuPohjaan);
+        Add(pohja);
+    }
+
+    //palne hit the bottom
+    void OsuPohjaan(PhysicsObject tormaaja, PhysicsObject kohde)
+    {
+        Rajahdys(kohde as GameObject, false);
+        kohde.Destroy();
     }
 }

@@ -21,6 +21,7 @@ public class AirDefense : PhysicsGame
     Image[] koneKuvat = LoadImages("plane", "plane2", "plane3", "plane4", "plane6");
     Image[] liekkiKuvat = LoadImages("flame", "flame2", "flame", "flame4");
     DoubleMeter osumat;
+    ScoreList topLista;
     int kenttaNro = 1;
     int nopeus = 0;
     double skaalaus = 0;
@@ -43,6 +44,7 @@ public class AirDefense : PhysicsGame
         MediaPlayer.Play("AirDefense");
         MediaPlayer.IsRepeating = true;
         MediaPlayer.Volume = 0.05;
+        ParhaatPisteet();
         SeuraavaKentta();
     }
 
@@ -50,7 +52,7 @@ public class AirDefense : PhysicsGame
     void SeuraavaKentta()
     {
         ClearAll();
-        ammuAaniB = LoadSoundEffect("Shoot");
+        ammuAaniB = LoadSoundEffect("Shoot2");
         rajahdysAani = LoadSoundEffect("Explosion");
         liikutaAani = LoadSoundEffect("Turn1");
         liikutaAani2 = LoadSoundEffect("Turn");
@@ -87,13 +89,13 @@ public class AirDefense : PhysicsGame
         else if(kenttaNro == 4)
         {
             nopeus = 10;
-            skaalaus = 1.02;
+            skaalaus = 1.007;
             LataaTaustakuvat("AirPanorama11", 10);
         }
         else if (kenttaNro == 5)
         {
             nopeus = 40;
-            skaalaus = 1.04;
+            skaalaus = 1.02;
             LataaTaustakuvat("AirPanorama10", 3);
         }
         else if (kenttaNro == 6)
@@ -116,7 +118,7 @@ public class AirDefense : PhysicsGame
         }
         else if (kenttaNro == 9)
         {
-            nopeus = 100;
+            nopeus = 110;
             skaalaus = 1.05;
             LataaTaustakuvat("AirPanorama2", 3);
         }
@@ -474,11 +476,12 @@ public class AirDefense : PhysicsGame
         lisaaKone.Interval = 0.01;
         lisaaKone.Timeout += TeeLentokone;
         lisaaKone.Start();
+        NaytaPisteet();
 
         Timer.SingleShot(0.1, delegate { Otsikko("End of game", 1, 5); });
         Timer.SingleShot(2.6, delegate { Otsikko("End of game", 1, 5); });
         Timer.SingleShot(5.1, delegate { Otsikko("End of game", 1, 5); });
-        Timer.SingleShot(7, delegate { lisaaKone.Stop(); Pause(); Painikkeet(); });
+        Timer.SingleShot(7, delegate { lisaaKone.Stop(); Pause(); });
     }
 
     //add start and end buttons
@@ -498,6 +501,48 @@ public class AirDefense : PhysicsGame
         Mouse.ListenOn(endPainike, MouseButton.Left, ButtonState.Pressed, Exit, "");
     }
 
+    //add top ten score list
+    void ParhaatPisteet()
+    {
+        string tiedosto = "pisteet.xml";
+        topLista = new ScoreList(10, false, 0);
+        topLista = DataStorage.TryLoad<ScoreList>(topLista, tiedosto);
+    }
+
+    //show top ten score window
+    void NaytaPisteet()
+    {
+        HighScoreWindow topIkkuna = new HighScoreWindow(
+                              "",
+                              "",
+                              topLista, kenttaNro);
+        topIkkuna.Closed += TallennaPisteet;
+        topIkkuna.Image = LoadImage("ScoreList");
+        topIkkuna.Layout.RightPadding = 50;
+        topIkkuna.Layout.LeftPadding = 50;
+        topIkkuna.Height = 500;
+        topIkkuna.Width = 350;
+        topIkkuna.SizingByLayout = false;
+        topIkkuna.OKButton.Image = LoadImage("OK");
+        topIkkuna.OKButton.Text = "";
+        topIkkuna.NameInputWindow.Image = LoadImage("ScoreName");
+        topIkkuna.NameInputWindow.Layout.RightPadding = 70;
+        topIkkuna.NameInputWindow.Layout.LeftPadding = 50;
+        topIkkuna.NameInputWindow.Layout.BottomPadding = 70;
+        topIkkuna.NameInputWindow.Layout.TopPadding = 70;
+        topIkkuna.NameInputWindow.OKButton.Image = LoadImage("OK");
+        topIkkuna.NameInputWindow.OKButton.Text = "";
+        Add(topIkkuna);
+    }
+
+    //save score lists
+    void TallennaPisteet(Window sender)
+    {
+        string tiedosto = "pisteet.xml";
+        DataStorage.Save<ScoreList>(topLista, tiedosto);
+        Painikkeet();
+    }
+
     //start game again
     void AlotaAlusta()
     {
@@ -511,6 +556,7 @@ public class AirDefense : PhysicsGame
     //show victory level
     void Voitto()
     {
+        NaytaPisteet();
         GameObject tausta = new GameObject(Screen.Width, Screen.Height);
         tausta.Image = LoadImage("plane1");
         Add(tausta);
@@ -537,7 +583,7 @@ public class AirDefense : PhysicsGame
         Add(pohja);
     }
 
-    //palne hit the bottom
+    //plane hit the bottom
     void OsuPohjaan(PhysicsObject tormaaja, PhysicsObject kohde)
     {
         Rajahdys(kohde as GameObject, false);

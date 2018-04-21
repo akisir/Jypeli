@@ -574,7 +574,7 @@ public class AirDefense : PhysicsGame
         kaannaAani.Volume = 0.05;
     }
 
-    //bottom that explode planes at victory level
+    //bottom that explodes planes at victory level
     void TeePohja()
     {
         PhysicsObject pohja = PhysicsObject.CreateStaticObject(Screen.Width, 10);

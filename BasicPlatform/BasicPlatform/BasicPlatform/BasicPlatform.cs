@@ -12,7 +12,7 @@ public class BasicPlatform : PhysicsGame
     const double hyppyNopeus = 750;
     double nopeus = 350;
     const int RUUDUN_KOKO = 40;
-    int kenttaNro = 2;
+    int kenttaNro = 0;
 
     PlatformCharacter pelaaja1;
     PhysicsObject euro;

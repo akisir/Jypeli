@@ -296,16 +296,19 @@ public class LabyrinthGolf : PhysicsGame
     //asking player's name
     void Pelaaja()
     {
-        InputWindow nimi = new InputWindow("Name: ");
-        nimi.MaxCharacters = 15;
-        nimi.Image = LoadImage("golf3");
-        nimi.OKButton.Image = LoadImage("go1");
-        nimi.OKButton.Text = "";
-        nimi.Layout.RightPadding = 50;
-        nimi.Layout.TopPadding = 50;
-        nimi.Layout.BottomPadding = 50;
-        nimi.TextEntered += TallennaNimi;
-        Add(nimi);
+        if(kenttaNro <= 1)
+        {
+            InputWindow nimi = new InputWindow("Name: ");
+            nimi.MaxCharacters = 15;
+            nimi.Image = LoadImage("golf3");
+            nimi.OKButton.Image = LoadImage("go1");
+            nimi.OKButton.Text = "";
+            nimi.Layout.RightPadding = 50;
+            nimi.Layout.TopPadding = 50;
+            nimi.Layout.BottomPadding = 50;
+            nimi.TextEntered += TallennaNimi;
+            Add(nimi);
+        }
     }
 
     //label of player name

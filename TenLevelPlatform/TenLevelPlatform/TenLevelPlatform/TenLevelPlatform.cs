@@ -12,7 +12,7 @@ public class TenLevelPlatform : PhysicsGame
     const double maxNopeus = 800;
     const int RUUDUN_KOKO = 40;
     double nopeus = 200;
-    int kenttaNro = 11;
+    int kenttaNro = 1;
     int kissatMaara = 0;
     bool piikitetty = false;
     int superHyppy = 0;

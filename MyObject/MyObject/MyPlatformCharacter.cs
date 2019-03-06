@@ -1,4 +1,6 @@
-﻿using System;
+﻿//MyPlatformCharacter.cs 6.3.2019
+//by Aki Sirviö
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,12 +9,14 @@ using Jypeli;
 using Jypeli.Assets;
 using Jypeli.Widgets;
 
+// own character class inherited is PaltformCharacter
 class MyPlatformCharacter : PlatformCharacter
 {
     private DoubleMeter pisteLaskuri;
     private ProgressBar pistePalkki;
     private int maxVal = 0;
 
+    // constructor takes 3 parameters
     public MyPlatformCharacter(double leveys, double korkeus, int maxScore)
         : base(leveys, korkeus)
     {
@@ -21,6 +25,7 @@ class MyPlatformCharacter : PlatformCharacter
         LisaaAse();
     }
 
+    // shoot with gun
     public void AmmuAseella()
     {
         PhysicsObject ammus = Weapon.Shoot();
@@ -28,11 +33,13 @@ class MyPlatformCharacter : PlatformCharacter
         { }
     }
 
+    // add point
     public void LisaaPiste()
     {
         pisteLaskuri.Value++;
     }
 
+    // make counter
     private void TeeLaskuri()
     {
         pisteLaskuri = new DoubleMeter(0);
@@ -46,11 +53,13 @@ class MyPlatformCharacter : PlatformCharacter
         Add(pistePalkki);
     }
 
+    // next level
     private void SeuraavaKentta()
     {
         pistePalkki.BarColor = Color.Green;
     }
 
+    // add gun
     private void LisaaAse()
     {
         AssaultRifle ase = new AssaultRifle(30, 10);
@@ -59,6 +68,7 @@ class MyPlatformCharacter : PlatformCharacter
         Weapon = ase;
     }
 
+    // ammo hit collision handler
     private void AmmusOsui(PhysicsObject ammus, PhysicsObject kohde)
     {
         ammus.Destroy();

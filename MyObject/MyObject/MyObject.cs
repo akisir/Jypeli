@@ -1,4 +1,6 @@
-﻿using System;
+﻿//MyObject.cs 6.3.2019
+//by Aki Sirviö
+using System;
 using System.Collections.Generic;
 using Jypeli;
 using Jypeli.Assets;
@@ -18,6 +20,7 @@ public class MyObject : PhysicsGame
 
     SoundEffect maaliAani = LoadSoundEffect("maali");
 
+    // starts here
     public override void Begin()
     {
         Gravity = new Vector(0, -1000);
@@ -30,6 +33,7 @@ public class MyObject : PhysicsGame
         Camera.StayInLevel = true;
     }
 
+    // add level
     void LuoKentta()
     {
         TileMap kentta = TileMap.FromLevelAsset("kentta1");
@@ -41,6 +45,7 @@ public class MyObject : PhysicsGame
         Level.Background.CreateGradient(Color.White, Color.SkyBlue);
     }
 
+    // add bouncy blocks
     void LisaaTaso(Vector paikka, double leveys, double korkeus)
     {
         PhysicsObject taso = PhysicsObject.CreateStaticObject(leveys, korkeus);
@@ -49,6 +54,7 @@ public class MyObject : PhysicsGame
         Add(taso);
     }
 
+    // add stars
     void LisaaTahti(Vector paikka, double leveys, double korkeus)
     {
         PhysicsObject tahti = PhysicsObject.CreateStaticObject(leveys, korkeus);
@@ -59,6 +65,7 @@ public class MyObject : PhysicsGame
         Add(tahti);
     }
 
+    // add character
     void LisaaPelaaja(Vector paikka, double leveys, double korkeus)
     {
         pelaaja1 = new MyPlatformCharacter(leveys, korkeus, 10);
@@ -69,6 +76,7 @@ public class MyObject : PhysicsGame
         Add(pelaaja1);
     }
 
+    // controls
     void LisaaNappaimet()
     {
         Keyboard.Listen(Key.F1, ButtonState.Pressed, ShowControlHelp, "Näytä ohjeet");
@@ -89,16 +97,19 @@ public class MyObject : PhysicsGame
         PhoneBackButton.Listen(ConfirmExit, "Lopeta peli");
     }
 
+    // move character
     void Liikuta(PlatformCharacter hahmo, double nopeus)
     {
         hahmo.Walk(nopeus);
     }
 
+    // jump character
     void Hyppaa(PlatformCharacter hahmo, double nopeus)
     {
         hahmo.Jump(nopeus);
     }
 
+    // collision handler
     void TormaaTahteen(PhysicsObject hahmo, PhysicsObject tahti)
     {
         maaliAani.Play();

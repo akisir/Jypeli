@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PipelineBuildEvent xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <SourceFile>F:/Users/HAM/source/repos/GameChat/GameChat/Content/maali.wav</SourceFile>
+  <SourceTime>2019-03-19T13:22:23.4126028+02:00</SourceTime>
+  <DestFile>F:/Users/HAM/source/repos/GameChat/GameChat/Content/bin/Windows/maali.xnb</DestFile>
+  <DestTime>2019-03-19T21:33:13.4790503+02:00</DestTime>
+  <Importer>WavImporter</Importer>
+  <ImporterTime>2017-03-01T17:05:36+02:00</ImporterTime>
+  <Processor>SoundEffectProcessor</Processor>
+  <ProcessorTime>2017-03-01T17:05:36+02:00</ProcessorTime>
+  <Parameters>
+    <Key>Quality</Key>
+    <Value>Best</Value>
+  </Parameters>
+  <Dependencies />
+  <BuildAsset />
+  <BuildOutput />
+</PipelineBuildEvent>

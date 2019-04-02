@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PipelineBuildEvent xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <SourceFile>F:/Users/HAM/source/repos/GolfServer/GolfServer/Content/golfball.wav</SourceFile>
+  <SourceTime>2018-02-12T12:33:01.5072789+02:00</SourceTime>
+  <DestFile>F:/Users/HAM/source/repos/GolfServer/GolfServer/Content/bin/Windows/golfball.xnb</DestFile>
+  <DestTime>2019-03-28T16:44:15.9096645+02:00</DestTime>
+  <Importer>WavImporter</Importer>
+  <ImporterTime>2017-03-01T17:05:36+02:00</ImporterTime>
+  <Processor>SoundEffectProcessor</Processor>
+  <ProcessorTime>2017-03-01T17:05:36+02:00</ProcessorTime>
+  <Parameters>
+    <Key>Quality</Key>
+    <Value>Best</Value>
+  </Parameters>
+  <Dependencies />
+  <BuildAsset />
+  <BuildOutput />
+</PipelineBuildEvent>

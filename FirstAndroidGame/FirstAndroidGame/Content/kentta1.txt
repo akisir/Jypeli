@@ -1,0 +1,23 @@
+ ################################
+#  V          V               V  #
+     *                     *     
+# TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT #
+                  *              
+#               V       V        #
+       *                         
+#  TTTTTTTTTTTTTTTTTTTTTTTTTTTT  #
+                                 
+#                        *       #
+                        V         
+#                                #
+  TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT  
+#                                #
+         *                       
+#                                #
+                                 
+#                                #
+                      *          
+#             N                  #
+                                 
+#                                #
+KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
